@@ -1,0 +1,4 @@
+# Eine Student-ID pro Zeile (z.B. nachname_vorname)
+# Leerzeilen und Zeilen mit # werden ignoriert
+mustermann_max
+musterfrau_anna

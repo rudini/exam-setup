@@ -1,0 +1,17 @@
+# Echte Studentendaten – niemals committen
+credentials/
+students.txt
+workspaces/
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Caddy (wird automatisch generiert)
+Caddyfile.generated
