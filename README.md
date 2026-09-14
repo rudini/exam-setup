@@ -223,6 +223,23 @@ docker build -t exam-code-server .
 
 ---
 
+## Java-Variante
+
+Für eine Java-Prüfung liegt eine zweite Image-Definition bereit:
+
+- **`Dockerfile.java`** – installiert OpenJDK 21 + Maven statt Node/TypeScript, sowie die Extension `redhat.java` (Language Support for Java, EPL-lizenziert, via open-vsx.org installiert **bevor** der Marketplace deaktiviert wird)
+- **`workspace-template-java/`** – Startcode `src/Main.java` sowie `.vscode/tasks.json` mit Tasks „Java: Compile" und „Java: Run" (Standard-Build-Task, `Ctrl+Shift+B`)
+
+Image damit bauen (Image-Name bleibt `exam-code-server`, daher keine Änderungen an `setup.sh`/`exam-start.sh` nötig):
+
+```bash
+docker build -f Dockerfile.java -t exam-code-server .
+```
+
+**Hinweis:** Ein grafischer Debugger (Breakpoints etc.) ist bewusst nicht eingerichtet – `vscjava.vscode-java-debug` ist eine Microsoft-Extension mit eingeschränkten Redistributions-Bedingungen und daher nicht standardmässig via open-vsx installierbar. Kompilieren/Ausführen funktioniert über die Tasks bzw. direkt im Terminal (`javac`/`java`).
+
+---
+
 ## Sicherheitsmerkmale
 
 | Feature | Beschreibung |
