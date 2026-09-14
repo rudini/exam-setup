@@ -36,17 +36,21 @@ Danach wie gewohnt mit `./setup.sh` fortfahren (siehe unten). `credentials/` und
 
 ```
 exam-setup/
-├── setup.sh                  # Einmalige Initialisierung
+├── setup.sh                  # Einmalige Initialisierung (Standard: TypeScript)
+├── setup_java.sh             # Einmalige Initialisierung, Java-Variante (Wrapper um `setup.sh java`)
 ├── exam-start.sh             # Pruefung starten
 ├── exam-collect.sh           # Abgaben einsammeln
 ├── exam-end.sh               # Pruefung beenden
 ├── lock-service.py           # Session-Lock (verhindert doppelten Login)
 ├── students.txt              # Studentenliste
-├── Dockerfile                # Docker-Image-Definition
+├── Dockerfile                # Docker-Image-Definition (TypeScript)
+├── Dockerfile.java           # Docker-Image-Definition (Java)
 ├── Caddyfile                 # Wird automatisch generiert
 ├── workspace-template/       # TypeScript-Startprojekt
 │   ├── package.json
 │   └── src/index.ts
+├── workspace-template-java/  # Java-Startprojekt
+│   └── src/Main.java
 ├── workspaces/               # Studentenworkspaces (live + Abgaben)
 └── credentials/              # Zugangsdaten (Passwörter pro Student)
 ```
@@ -230,10 +234,11 @@ Für eine Java-Prüfung liegt eine zweite Image-Definition bereit:
 - **`Dockerfile.java`** – installiert OpenJDK 21 + Maven statt Node/TypeScript, sowie die Extension `redhat.java` (Language Support for Java, EPL-lizenziert, via open-vsx.org installiert **bevor** der Marketplace deaktiviert wird)
 - **`workspace-template-java/`** – Startcode `src/Main.java` sowie `.vscode/tasks.json` mit Tasks „Java: Compile" und „Java: Run" (Standard-Build-Task, `Ctrl+Shift+B`)
 
-Image damit bauen (Image-Name bleibt `exam-code-server`, daher keine Änderungen an `setup.sh`/`exam-start.sh` nötig):
+Statt `./setup.sh` einfach `./setup_java.sh` ausführen (dünner Wrapper um `setup.sh java`) – Caddy/cloudflared/systemd-Setup ist identisch, nur das Docker-Image wird aus `Dockerfile.java` mit dem Template `workspace-template-java/` gebaut. Der Image-Name bleibt `exam-code-server`, daher sind keine weiteren Änderungen an `exam-start.sh` nötig:
 
 ```bash
-docker build -f Dockerfile.java -t exam-code-server .
+./setup_java.sh
+# äquivalent zu: ./setup.sh java
 ```
 
 **Hinweis:** Ein grafischer Debugger (Breakpoints etc.) ist bewusst nicht eingerichtet – `vscjava.vscode-java-debug` ist eine Microsoft-Extension mit eingeschränkten Redistributions-Bedingungen und daher nicht standardmässig via open-vsx installierbar. Kompilieren/Ausführen funktioniert über die Tasks bzw. direkt im Terminal (`javac`/`java`).

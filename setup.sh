@@ -4,7 +4,15 @@ set -euo pipefail
 BREW="/home/linuxbrew/.linuxbrew/bin/brew"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "=== Exam Setup: Einmalige Initialisierung ==="
+# Variante wählen: "ts" (Standard, TypeScript) oder "java"
+VARIANT="${1:-ts}"
+case "$VARIANT" in
+    ts)   DOCKERFILE="Dockerfile" ;;
+    java) DOCKERFILE="Dockerfile.java" ;;
+    *)    echo "Unbekannte Variante '$VARIANT' (erlaubt: ts, java)" >&2; exit 1 ;;
+esac
+
+echo "=== Exam Setup: Einmalige Initialisierung (Variante: $VARIANT) ==="
 
 # 1. Caddy installieren
 if command -v caddy &>/dev/null; then
@@ -25,8 +33,8 @@ else
 fi
 
 # 3. Docker-Image bauen
-echo "[...] Baue Docker-Image 'exam-code-server'..."
-docker build -t exam-code-server "$SCRIPT_DIR"
+echo "[...] Baue Docker-Image 'exam-code-server' aus $DOCKERFILE..."
+docker build -f "$SCRIPT_DIR/$DOCKERFILE" -t exam-code-server "$SCRIPT_DIR"
 echo "[OK] Docker-Image gebaut."
 
 # 4. Systemd-User-Service für Caddy erstellen
