@@ -246,6 +246,32 @@ Statt `./setup.sh` einfach `./setup_java.sh` ausführen (dünner Wrapper um `set
 
 **Hinweis:** Ein grafischer Debugger (Breakpoints etc.) ist bewusst nicht eingerichtet – `vscjava.vscode-java-debug` ist eine Microsoft-Extension mit eingeschränkten Redistributions-Bedingungen und daher nicht standardmässig via open-vsx installierbar. Kompilieren/Ausführen funktioniert über die Tasks bzw. direkt im Terminal (`mvn compile exec:java`).
 
+**Wichtig:** Beide Varianten bauen auf denselben Image-Namen `exam-code-server` – es kann pro Host immer nur **eine** Variante aktiv sein, nicht beide gleichzeitig. Zum Wechseln einfach das jeweils andere Setup-Skript ausführen (baut das Image neu und überschreibt den bisherigen Tag); laufende Container einer Prüfung sind davon unberührt, erst der nächste `exam-start.sh`-Lauf verwendet dann das neue Image.
+
+---
+
+## Bestehendes Projekt einbringen
+
+Standardmässig starten Studenten mit dem minimalen Template (`workspace-template/` bzw. `workspace-template-java/`). Um stattdessen ein bestehendes Projekt als Startpunkt zu verwenden:
+
+### Weg A – gemeinsames Startprojekt für alle Studenten
+
+Das Template wird beim allerersten Containerstart automatisch in den Workspace kopiert (nur wenn der Workspace-Ordner noch leer ist – siehe `exam-start.sh`).
+
+**TypeScript/JavaScript:**
+1. Bestehendes Projekt nach `workspace-template/` kopieren (`package.json`, `src/`, etc. ersetzen)
+2. `./setup.sh` neu ausführen – baut das Image neu, `npm install` läuft dabei automatisch gegen das neue `package.json` und wird mitgebacken (kein Internet zur Laufzeit nötig)
+3. Falls `.vscode/launch.json` einen bestimmten Einstiegspunkt referenziert, Pfad anpassen
+
+**Java:**
+1. Bestehendes Maven-Projekt nach `workspace-template-java/` kopieren (`pom.xml`, `src/main/java/...`)
+2. `./setup_java.sh` neu ausführen – baut das Image neu und lädt dabei automatisch alle in der `pom.xml` deklarierten Dependencies (und Build-Plugins) in den `.m2`-Cache vor
+3. Falls die Hauptklasse nicht `Main` heisst, `<exec.mainClass>` in der `pom.xml` anpassen
+
+### Weg B – individuell pro Student
+
+Da das Template nur bei **leerem** Workspace kopiert wird, kann ein Projekt auch direkt in `workspaces/<student_id>/` abgelegt werden, **bevor** `exam-start.sh` läuft – der automatische Kopiermechanismus greift dann gar nicht, und der Container mountet das Projekt direkt. Damit lassen sich auch unterschiedliche Startzustände pro Student verteilen.
+
 ---
 
 ## Sicherheitsmerkmale
