@@ -2,9 +2,11 @@ FROM codercom/code-server:latest
 
 USER root
 
-# Install JDK 21 LTS + Maven
+# Install JDK 21 LTS + Maven + python3 (benötigt für den
+# Marketplace-Deaktivierungsschritt weiter unten; im aktuellen Basis-Image
+# nicht mehr enthalten)
 RUN apt-get update \
-    && apt-get install -y openjdk-21-jdk-headless maven \
+    && apt-get install -y openjdk-21-jdk-headless maven python3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -15,6 +17,21 @@ RUN code-server --install-extension redhat.java || true
 # Workspace-Template mit vorinstallierten Dependencies
 COPY workspace-template-java/ /opt/workspace-template/
 RUN chmod -R 755 /opt/workspace-template
+
+# Maven-Dependencies + Build-Plugins (compiler, exec) zur Build-Zeit in den
+# .m2-Cache von "coder" vorladen, damit Studenten zur Laufzeit kein Internet
+# brauchen. Es wird exakt "compile exec:java" ausgeführt (derselbe Befehl wie
+# im "Java: Run"-Task) statt nur "compile" oder "dependency:go-offline": das
+# "exec"-Plugin-Prefix wird erst bei tatsächlichem Aufruf von exec:java
+# aufgelöst (Plugin-Prefix-Metadaten), nicht schon bei "compile" allein.
+# Repo-Pfad wird explizit gesetzt (statt über $HOME), da "mvn" "user.home"
+# nicht zuverlässig aus einem vorangestellten HOME=... ableitet; das ist
+# derselbe Pfad, den Maven zur Laufzeit als "coder" per Default verwendet.
+RUN M2_REPO=/home/coder/.m2/repository \
+    && mkdir -p "$M2_REPO" \
+    && mvn -q -B -Dmaven.repo.local="$M2_REPO" -f /opt/workspace-template/pom.xml compile exec:java \
+    && mvn -q -B -Dmaven.repo.local="$M2_REPO" -f /opt/workspace-template/pom.xml clean \
+    && chown -R coder:coder /home/coder/.m2
 
 # Disable extensions marketplace:
 # 1. Remove extensionsGallery from product.json

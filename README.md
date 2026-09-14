@@ -49,8 +49,9 @@ exam-setup/
 ├── workspace-template/       # TypeScript-Startprojekt
 │   ├── package.json
 │   └── src/index.ts
-├── workspace-template-java/  # Java-Startprojekt
-│   └── src/Main.java
+├── workspace-template-java/  # Java-Startprojekt (Maven)
+│   ├── pom.xml
+│   └── src/main/java/Main.java
 ├── workspaces/               # Studentenworkspaces (live + Abgaben)
 └── credentials/              # Zugangsdaten (Passwörter pro Student)
 ```
@@ -232,7 +233,9 @@ docker build -t exam-code-server .
 Für eine Java-Prüfung liegt eine zweite Image-Definition bereit:
 
 - **`Dockerfile.java`** – installiert OpenJDK 21 + Maven statt Node/TypeScript, sowie die Extension `redhat.java` (Language Support for Java, EPL-lizenziert, via open-vsx.org installiert **bevor** der Marketplace deaktiviert wird)
-- **`workspace-template-java/`** – Startcode `src/Main.java` sowie `.vscode/tasks.json` mit Tasks „Java: Compile" und „Java: Run" (Standard-Build-Task, `Ctrl+Shift+B`)
+- **`workspace-template-java/`** – Maven-Projekt (`pom.xml` + `src/main/java/Main.java`, Standard-Layout) sowie `.vscode/tasks.json` mit Tasks „Java: Compile" und „Java: Run" (Standard-Build-Task, `Ctrl+Shift+B`, führt `mvn compile exec:java` aus)
+
+Beim Image-Build wird `mvn compile exec:java` einmal gegen das Template ausgeführt, um alle Dependencies **und** Build-Plugins (Compiler, `exec-maven-plugin`) in den `.m2`-Cache des `coder`-Users vorzuladen – Studenten brauchen zur Laufzeit dadurch kein Internet für Maven. Wird `workspace-template-java/pom.xml` um zusätzliche Dependencies ergänzt (siehe „Bestehendes Projekt einbringen" weiter unten), müssen diese vor dem `docker build` einmal online auflösbar sein, damit sie mitgecacht werden.
 
 Statt `./setup.sh` einfach `./setup_java.sh` ausführen (dünner Wrapper um `setup.sh java`) – Caddy/cloudflared/systemd-Setup ist identisch, nur das Docker-Image wird aus `Dockerfile.java` mit dem Template `workspace-template-java/` gebaut. Der Image-Name bleibt `exam-code-server`, daher sind keine weiteren Änderungen an `exam-start.sh` nötig:
 
@@ -241,7 +244,7 @@ Statt `./setup.sh` einfach `./setup_java.sh` ausführen (dünner Wrapper um `set
 # äquivalent zu: ./setup.sh java
 ```
 
-**Hinweis:** Ein grafischer Debugger (Breakpoints etc.) ist bewusst nicht eingerichtet – `vscjava.vscode-java-debug` ist eine Microsoft-Extension mit eingeschränkten Redistributions-Bedingungen und daher nicht standardmässig via open-vsx installierbar. Kompilieren/Ausführen funktioniert über die Tasks bzw. direkt im Terminal (`javac`/`java`).
+**Hinweis:** Ein grafischer Debugger (Breakpoints etc.) ist bewusst nicht eingerichtet – `vscjava.vscode-java-debug` ist eine Microsoft-Extension mit eingeschränkten Redistributions-Bedingungen und daher nicht standardmässig via open-vsx installierbar. Kompilieren/Ausführen funktioniert über die Tasks bzw. direkt im Terminal (`mvn compile exec:java`).
 
 ---
 

@@ -4,14 +4,14 @@
     {
       "label": "Java: Compile",
       "type": "shell",
-      "command": "javac -d bin src/Main.java",
+      "command": "mvn -q -B compile",
       "group": "build",
       "problemMatcher": ["$javac"]
     },
     {
       "label": "Java: Run",
       "type": "shell",
-      "command": "javac -d bin src/Main.java && java -cp bin Main",
+      "command": "mvn -q -B compile exec:java",
       "group": {
         "kind": "build",
         "isDefault": true

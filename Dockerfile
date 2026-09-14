@@ -2,9 +2,11 @@ FROM codercom/code-server:latest
 
 USER root
 
-# Install Node.js 22 LTS via NodeSource
+# Install Node.js 22 LTS via NodeSource + python3 (benötigt für den
+# Marketplace-Deaktivierungsschritt weiter unten; im aktuellen Basis-Image
+# nicht mehr enthalten)
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs \
+    && apt-get install -y nodejs python3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
