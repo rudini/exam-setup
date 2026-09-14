@@ -145,8 +145,10 @@ for STUDENT_ID in "${STUDENTS[@]}"; do
 
     echo -e "  ${GREEN}[OK]${NC} $CONTAINER_NAME (Netzwerk: $NET_NAME, Port: $C_PORT)"
 
-    # Template in leeren Workspace kopieren (nur wenn noch kein package.json vorhanden)
-    if [[ ! -f "${WORKSPACE}/package.json" ]]; then
+    # Template in leeren Workspace kopieren (nur beim allerersten Start,
+    # sprachunabhängig anhand eines leeren Workspace-Verzeichnisses erkannt –
+    # verhindert, dass laufende Arbeit bei einem Neustart überschrieben wird)
+    if [[ -z "$(ls -A "$WORKSPACE" 2>/dev/null)" ]]; then
         docker exec "$CONTAINER_NAME" cp -r /opt/workspace-template/. /home/coder/project/
         echo -e "  ${GREEN}[OK]${NC} Template kopiert → $STUDENT_ID"
     fi
